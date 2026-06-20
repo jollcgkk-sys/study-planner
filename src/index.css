@@ -1,0 +1,199 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Cairo", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  /* Default Theme (Light) */
+  --bg: #f8fafc;
+  --bg2: #ffffff;
+  --card: #ffffff;
+  --surface: #f1f5f9;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --danger: #ef4444;
+  --success: #22c55e;
+  --input-bg: #ffffff;
+  --input-text: #0f172a;
+  --input-border: #e2e8f0;
+  --placeholder: #94a3b8;
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --theme-bg-image: none;
+}
+
+[data-theme="cats_night"] {
+  /* Cats Night Theme (Dark) */
+  --bg: #0f172a;
+  --bg2: #111827;
+  --card: #1e293b;
+  --surface: #111827;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --border: #0f172a;
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --danger: #ef4444;
+  --success: #22c55e;
+  --input-bg: #1e293b;
+  --input-text: #f8fafc;
+  --input-border: #334155;
+  --placeholder: #64748b;
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --theme-bg-image: url('https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=2043&auto=format&fit=crop');
+}
+
+[data-theme="pink_cute"] {
+  /* Pink Cute Theme */
+  --bg: #fff5f7;
+  --bg2: #ffe4e6;
+  --card: #ffffff;
+  --surface: #fff1f2;
+  --text: #881337;
+  --muted: #db2777;
+  --border: #fecdd3;
+  --primary: #f43f5e;
+  --primary-hover: #e11d48;
+  --danger: #ef4444;
+  --success: #10b981;
+  --input-bg: #ffffff;
+  --input-text: #881337;
+  --input-border: #fecdd3;
+  --placeholder: #fda4af;
+  --shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.1), 0 4px 6px -4px rgba(244, 63, 94, 0.1);
+  --theme-bg-image: url('/src/assets/images/pink_sweet_pattern_1781891414768.jpg');
+}
+
+[data-theme="sandy_cat"] {
+  /* Sandy Cat Theme */
+  --bg: #fef3c7;
+  --bg2: #fde68a;
+  --card: #ffffff;
+  --surface: #fde68a;
+  --text: #78350f;
+  --muted: #b45309;
+  --border: #fcd34d;
+  --primary: #d97706;
+  --primary-hover: #b45309;
+  --danger: #ef4444;
+  --success: #22c55e;
+  --input-bg: #ffffff;
+  --input-text: #78350f;
+  --input-border: #fcd34d;
+  --placeholder: #b45309;
+  --shadow: 0 4px 6px -1px rgb(217 119 6 / 0.1), 0 2px 4px -2px rgb(217 119 6 / 0.1);
+  --theme-bg-image: url('https://images.unsplash.com/photo-1533738363-b7f9aef128ce?q=80&w=1935&auto=format&fit=crop');
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background-color 250ms ease, color 250ms ease;
+}
+
+/* Global transitions for theme elements */
+.theme-transition {
+  transition: background-color 250ms ease, color 250ms ease, border-color 250ms ease, box-shadow 250ms ease;
+}
+
+/* Theme Background Overlay */
+.theme-bg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: var(--theme-bg-image);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.15;
+  pointer-events: none;
+  transition: opacity 250ms ease, background-image 250ms ease;
+}
+
+[data-theme="default"] .theme-bg-overlay {
+  opacity: 0;
+}
+
+/* Pink Cute Theme Overrides */
+[data-theme="pink_cute"] .theme-bg-overlay {
+  background-image: var(--theme-bg-image);
+  background-size: 280px;
+  background-repeat: repeat;
+  opacity: 0.18;
+}
+
+[data-theme="pink_cute"] .border-\\[var\\(--border\\)\\] {
+  border-style: solid;
+  border-width: 1.5px;
+  border-color: #fecdd3 !important;
+}
+
+[data-theme="pink_cute"] .bg-\\[var\\(--primary\\)\\] {
+  background-image: linear-gradient(135deg, rgba(255,182,193,0.3) 0%, rgba(244,63,94,1) 100%);
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+}
+
+/* Global Animations */
+button {
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.reduce-motion * {
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+@media (max-width: 768px) {
+  .theme-bg-overlay {
+    opacity: 0.05 !important;
+  }
+}
+
+/* Fix for time/number inputs in Cats Night theme */
+[data-theme="cats_night"] input[type="time"],
+[data-theme="cats_night"] input[type="number"],
+[data-theme="cats_night"] select,
+[data-theme="cats_night"] option {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-color: #cbd5e1 !important;
+  color-scheme: light !important;
+}
+
+[data-theme="cats_night"] input[type="time"]::placeholder,
+[data-theme="cats_night"] input[type="number"]::placeholder {
+  color: #64748b !important;
+}
+
+[data-theme="cats_night"] input[type="time"]:focus,
+[data-theme="cats_night"] input[type="number"]:focus,
+[data-theme="cats_night"] select:focus {
+  border-color: var(--primary) !important;
+  outline: none;
+  box-shadow: 0 0 0 1px var(--primary) !important;
+}
+
+[data-theme="cats_night"] input[type="time"]::selection,
+[data-theme="cats_night"] input[type="number"]::selection {
+  background-color: var(--primary) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="cats_night"] input[type="time"]:disabled,
+[data-theme="cats_night"] input[type="number"]:disabled,
+[data-theme="cats_night"] select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
