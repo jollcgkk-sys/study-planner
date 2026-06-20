@@ -249,35 +249,88 @@ export default function Ask() {
 
       let data: any = null;
 
-      const res = await fetch("/api/ask-gemini", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          prompt,
-          model: selectedModel || "gemini-2.5-flash",
-          customApiKey: apiKey ? apiKey.trim() : null
-        })
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        const serverErrorMsg = errorData?.error?.message || `Error status: ${res.status}`;
-        
-        if (errorData?.error?.code === "MISSING_API_KEY") {
-          showLocalToast('الرجاء إدخال مفتاح API الخاص بك لتفعيل خدمات الذكاء الاصطناعي.', true);
-          setShowKeyForm(true);
-        } else {
-          showLocalToast(`خطأ في طلب الذكاء الاصطناعي: ${serverErrorMsg}`, true);
-        }
-        
+      if (!apiKey || !apiKey.trim()) {
+        showLocalToast('الرجاء إدخال مفتاح API الخاص بك لتفعيل خدمات الذكاء الاصطناعي.', true);
+        setShowKeyForm(true);
         fallbackSearch();
         setIsLoading(false);
         return;
       }
 
-      data = await res.json();
+      const activeModel = selectedModel || "gemini-2.5-flash";
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent?key=${encodeURIComponent(apiKey.trim())}`;
+      
+      const payload = {
+        contents: [
+          {
+            parts: [
+              {
+                text: prompt
+              }
+            ]
+          }
+        ],
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "OBJECT",
+            properties: {
+              isGeneralQuestion: {
+                type: "BOOLEAN",
+                description: "True if the question is general study help, chat, greetings, or study advice. False if searching or retrieving their schedule, tasks, or subjects."
+              },
+              answer: {
+                type: "STRING",
+                description: "Direct helpful response in Arabic (friendly study assistant tone). Must answer any general questions fully in Arabic, or write a short brief intro for specific schedule data."
+              },
+              targetTypes: {
+                type: "ARRAY",
+                items: { type: "STRING" },
+                description: "Desired task types: 'prep', 'homework', 'project', 'subject_note'."
+              },
+              isAllTasks: { type: "BOOLEAN" },
+              isImportantOnly: { type: "BOOLEAN" },
+              isProjectsOnly: { type: "BOOLEAN" },
+              targetDay: { type: "INTEGER", description: "Day index 0 to 6 (0=Monday, 6=Sunday), or null." },
+              targetSubjectId: { type: "STRING", description: "The UUID of the subject if named, or null." }
+            },
+            required: ["isGeneralQuestion", "answer"]
+          }
+        }
+      };
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        let errorMsg = errorData?.error?.message || `Error status: ${res.status}`;
+        
+        if (errorMsg.includes("API key not valid") || errorMsg.includes("key is invalid")) {
+          errorMsg = "مفتاح API المدخل غير صالح. يرجى التأكد من نسخه بشكل صحيح من Google AI Studio.";
+        } else if (errorMsg.includes("quota") || errorMsg.includes("429")) {
+          errorMsg = "تم تجاوز حد الاستهلاك المسموح به لمفتاح API هذا. يرجى الانتظار قليلاً أو تبديل المفتاح.";
+        }
+
+        showLocalToast(`خطأ في طلب الذكاء الاصطناعي: ${errorMsg}`, true);
+        fallbackSearch();
+        setIsLoading(false);
+        return;
+      }
+
+      const responseJson = await res.json();
+      const rawText = responseJson?.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (!rawText) {
+        throw new Error("لم تستجب خدمة الذكاء الاصطناعي بأي محتوى.");
+      }
+
+      data = JSON.parse(rawText);
 
       console.log("ASK DEBUG AI data:", data);
 
