@@ -1,8 +1,26 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Load variables with fallback placeholders to make the app robust in standalone/developer mode
-const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || 'https://placeholder-disabled.supabase.co';
+const rawSupabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || 'https://placeholder-disabled.supabase.co';
 const supabaseAnonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 'placeholder-anon-key';
+
+// Sanitize URL: Remove trailing slash, /rest/v1, /auth/v1, /graphql/v1 etc.
+let sanitizedSupabaseUrl = rawSupabaseUrl.trim();
+while (sanitizedSupabaseUrl.endsWith('/')) {
+  sanitizedSupabaseUrl = sanitizedSupabaseUrl.slice(0, -1);
+}
+if (sanitizedSupabaseUrl.endsWith('/rest/v1')) {
+  sanitizedSupabaseUrl = sanitizedSupabaseUrl.slice(0, -8);
+} else if (sanitizedSupabaseUrl.endsWith('/auth/v1')) {
+  sanitizedSupabaseUrl = sanitizedSupabaseUrl.slice(0, -8);
+} else if (sanitizedSupabaseUrl.endsWith('/graphql/v1')) {
+  sanitizedSupabaseUrl = sanitizedSupabaseUrl.slice(0, -11);
+}
+while (sanitizedSupabaseUrl.endsWith('/')) {
+  sanitizedSupabaseUrl = sanitizedSupabaseUrl.slice(0, -1);
+}
+
+const supabaseUrl = sanitizedSupabaseUrl;
 
 const isPlaceholderUrl = 
   !supabaseUrl || 
